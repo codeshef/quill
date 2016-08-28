@@ -71,6 +71,7 @@ class Quill {
     this.keyboard = this.theme.addModule('keyboard');
     this.clipboard = this.theme.addModule('clipboard');
     this.history = this.theme.addModule('history');
+    this.imageHandler = options.imageHandler;
     this.theme.init();
     this.pasteHTML(`<div class='ql-editor' style="white-space: normal;">${html}<p><br></p></div>`);
     this.history.clear();
@@ -210,19 +211,6 @@ class Quill {
     return change;
   }
 
-  insertImage(index, value, source, handler = null) {
-    if (typeof value === 'string') {
-      this.insertEmbed(index, 'image', value, source);
-      return;
-    }
-
-    (handler || function(value, callback) {
-      let reader = new FileReader();
-      reader.onload = e => callback(e.target.result);
-      reader.readAsDataURL(value);
-    })(value, value => this.insertEmbed(index, 'image', value, source));
-  }
-
   insertText(index, text, name, value, source) {
     let formats, range = this.getSelection();
     [index, , formats, source] = overload(index, 0, name, value, source);
@@ -313,7 +301,12 @@ Quill.DEFAULTS = {
   modules: {},
   placeholder: '',
   readOnly: false,
-  theme: 'default'
+  theme: 'default',
+  imageHandler(value, callback) {
+    let reader = new FileReader();
+    reader.onload = e => callback(e.target.result);
+    reader.readAsDataURL(value);
+  }
 };
 Quill.events = Emitter.events;
 Quill.sources = Emitter.sources;

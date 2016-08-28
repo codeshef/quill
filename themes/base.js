@@ -129,9 +129,15 @@ BaseTheme.DEFAULTS = extend(true, {}, Theme.DEFAULTS, {
             fileInput.classList.add('ql-image');
             fileInput.addEventListener('change', () => {
               if (fileInput.files != null && fileInput.files[0] != null) {
-                let range = this.quill.getSelection(true);
-                let index = range.index + range.length;
-                this.quill.insertImage(index, fileInput.files[0], Emitter.sources.USER);
+                this.quill.imageHandler(fileInput.files[0], (value) => {
+                  let range = this.quill.getSelection(true);
+                  this.quill.updateContents(new Delta()
+                    .retain(range.index)
+                    .delete(range.length)
+                    .insert({ image: value })
+                  , Emitter.sources.USER);
+                  fileInput.value = "";
+                });
               }
             });
             this.container.appendChild(fileInput);
